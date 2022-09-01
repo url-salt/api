@@ -4,7 +4,7 @@ import { Controller, Get, Inject, Param, Res } from "@nestjs/common";
 
 import { UrlService } from "@url/url.service";
 
-@Controller("shorts")
+@Controller("/")
 export class UrlController {
     public constructor(@Inject(UrlService) private readonly urlService: UrlService) {}
 
