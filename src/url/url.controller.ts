@@ -11,13 +11,13 @@ export class UrlController {
     @Get("/:id")
     public async processGet(@Param("id") id: string, @Res() response: Response) {
         if (!id) {
-            response.redirect(302, process.env.APP_URL);
+            response.redirect(302, `https://${process.env.APP_URL}`);
             return;
         }
 
         const entry = await this.urlService.get(id);
         if (!entry) {
-            response.redirect(302, process.env.APP_URL);
+            response.redirect(302, `https://${process.env.APP_URL}`);
             return;
         }
 
