@@ -21,8 +21,6 @@ export class UrlController {
             return;
         }
 
-        console.log(entry);
-
         return response.redirect(302, entry.originalUrl);
     }
 }
