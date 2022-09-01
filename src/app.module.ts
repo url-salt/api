@@ -6,6 +6,7 @@ import { ApolloDriver, ApolloDriverConfig } from "@nestjs/apollo";
 import { TypeOrmModule } from "@nestjs/typeorm";
 
 import { HelloWorldModule } from "@hello-world/hello-world.module";
+import { UrlModule } from "@url/url.module";
 
 import { createGraphQLContext } from "@utils/createGraphQLContext";
 
@@ -37,6 +38,10 @@ import { createGraphQLContext } from "@utils/createGraphQLContext";
             inject: [],
             useFactory: () => {
                 return {
+                    cors: {
+                        origin: "http://localhost:30000",
+                        credentials: true,
+                    },
                     installSubscriptionHandlers: true,
                     autoSchemaFile: path.join(
                         process.cwd(),
@@ -47,6 +52,7 @@ import { createGraphQLContext } from "@utils/createGraphQLContext";
             },
         }),
         HelloWorldModule,
+        UrlModule,
     ],
     controllers: [],
     providers: [],

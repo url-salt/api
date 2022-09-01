@@ -21,7 +21,8 @@
         "paths": {
             "@root/*": ["./src/*"],
             "@utils/*": ["./src/utils/*"],
-            "@hello-world/*": ["./src/hello-world/*"]
+            "@hello-world/*": ["./src/hello-world/*"],
+            "@url/*": ["./src/url/*"]
         }
     }
 }
