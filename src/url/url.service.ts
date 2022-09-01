@@ -42,7 +42,7 @@ export class UrlService {
     }
 
     public async shortenUrl(url: string) {
-        sleep(1500);
+        await sleep(1500);
 
         const entry = this.urlEntryRepository.create();
         entry.originalUrl = url;
