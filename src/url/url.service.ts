@@ -4,7 +4,9 @@ import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 
 import { UrlEntry } from "@url/entities/URLEntry.model";
+
 import { generateCharacterArray } from "@utils/generateCharacterArray";
+import { sleep } from "@utils/sleep";
 
 @Injectable()
 export class UrlService {
@@ -40,6 +42,8 @@ export class UrlService {
     }
 
     public async shortenUrl(url: string) {
+        sleep(1500);
+
         const entry = this.urlEntryRepository.create();
         entry.originalUrl = url;
         entry.uniqueId = await this.generateNextUniqueId();
