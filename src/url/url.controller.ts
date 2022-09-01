@@ -8,6 +8,11 @@ import { UrlService } from "@url/url.service";
 export class UrlController {
     public constructor(@Inject(UrlService) private readonly urlService: UrlService) {}
 
+    @Get("/")
+    public async root(@Res() response: Response) {
+        response.redirect(302, `https://${process.env.APP_URL}`);
+    }
+
     @Get("/:id")
     public async processGet(@Param("id") id: string, @Res() response: Response) {
         if (!id) {
