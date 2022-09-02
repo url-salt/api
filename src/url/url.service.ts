@@ -72,7 +72,7 @@ export class UrlService {
             });
 
             if (cache) {
-                return;
+                return cache;
             }
         }
 
@@ -89,7 +89,12 @@ export class UrlService {
         cache.description = entry.description || description || null;
         cache.image = cache.image || image || null;
 
-        return this.urlCacheRepository.save(cache);
+        const result = await this.urlCacheRepository.save(cache);
+
+        entry.cache = cache;
+        await this.urlEntryRepository.save(entry);
+
+        return result;
     }
 
     public async parseData(url: string) {
