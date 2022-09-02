@@ -1,6 +1,6 @@
 {
     "compilerOptions": {
-        "module": "commonjs",
+        "module": "NodeNext",
         "declaration": true,
         "removeComments": true,
         "emitDecoratorMetadata": true,
@@ -18,11 +18,14 @@
         "strictBindCallApply": false,
         "forceConsistentCasingInFileNames": false,
         "noFallthroughCasesInSwitch": false,
+        "allowJs": true,
+        "maxNodeModuleJsDepth": 10,
         "paths": {
             "@root/*": ["./src/*"],
             "@utils/*": ["./src/utils/*"],
             "@hello-world/*": ["./src/hello-world/*"],
-            "@url/*": ["./src/url/*"]
+            "@url/*": ["./src/url/*"],
+            "@file/*": ["./src/file/*"]
         }
     }
 }

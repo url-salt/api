@@ -7,6 +7,7 @@ import { TypeOrmModule } from "@nestjs/typeorm";
 
 import { HelloWorldModule } from "@hello-world/hello-world.module";
 import { UrlModule } from "@url/url.module";
+import { FileModule } from "@file/file.module";
 
 import { createGraphQLContext } from "@utils/createGraphQLContext";
 
@@ -53,6 +54,7 @@ import { createGraphQLContext } from "@utils/createGraphQLContext";
         }),
         HelloWorldModule,
         UrlModule,
+        FileModule,
     ],
     controllers: [],
     providers: [],

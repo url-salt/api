@@ -6,7 +6,13 @@ import * as path from "path";
 (async () => {
     const migrationName = process.argv.at(-1);
     const { stdout } = commandSync(
-        `yarn typeorm-ts-node-commonjs migration:generate -d ./typeorm.config.ts --dr ${migrationName}`,
+        `node -r ts-node/register -r tsconfig-paths/register ./node_modules/typeorm/cli.js migration:generate -d ./typeorm.config.ts --dr ${migrationName}`,
+        {
+            cwd: process.cwd(),
+            env: {
+                TS_NODE_PROJECT: "./tsconfig.json",
+            },
+        },
     );
     const firstLineIndex = stdout.split("\n").findIndex(line => line.startsWith("import { MigrationInterface"));
     const content = stdout.split("\n").slice(firstLineIndex).join("\n").trim();
