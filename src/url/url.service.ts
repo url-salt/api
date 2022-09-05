@@ -1,5 +1,6 @@
 import { JSDOM } from "jsdom";
 import { Repository } from "typeorm";
+import fetch from "node-fetch";
 
 import { Inject, Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
