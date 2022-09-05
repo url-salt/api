@@ -18,13 +18,15 @@ const ALLOWED_IMAGE_TYPE_REGEX = /^image\/(png|jpeg|jpg|bmp)$/;
 @Injectable()
 export class FileService {
     private readonly s3: AWS.S3;
+    public readonly region: string;
     public readonly defaultBucket = "usalt-images";
-    public readonly region = process.env.S3_REGION;
 
     public constructor(@InjectRepository(File) private readonly fileRepository: Repository<File>) {
-        if (!process.env.S3_ACCESS_KEY_ID || !process.env.S3_SECRET_ACCESS_KEY) {
+        if (!process.env.S3_ACCESS_KEY_ID || !process.env.S3_SECRET_ACCESS_KEY || !process.env.S3_REGION) {
             throw new Error("서버를 시작하기 위해 AWS 키 항목을 설정해야 합니다.");
         }
+
+        this.region = process.env.S3_REGION;
 
         this.s3 = new AWS.S3({
             apiVersion: "2006-03-01",
@@ -61,9 +63,7 @@ export class FileService {
             .promise();
     }
 
-    public async uploadFile(upload: Promise<FileUpload>, bucketName = this.defaultBucket) {
-        const { createReadStream } = await upload;
-        const buffer = await readStreamToBuffer(createReadStream());
+    public async uploadFileFromBuffer(buffer: Buffer, bucketName = this.defaultBucket) {
         const fileType = await getFileType(buffer);
         if (!fileType || !ALLOWED_IMAGE_TYPE_REGEX.test(fileType.mime)) {
             throw new Error("파일 형식이 올바르지 않습니다.");
@@ -76,7 +76,7 @@ export class FileService {
         fileEntity.name = fileName;
         fileEntity.bucketName = bucketName;
         fileEntity.size = buffer.length;
-        fileEntity.region = process.env.S3_REGION;
+        fileEntity.region = this.region;
         fileEntity.extension = fileType.ext;
 
         if (ALLOWED_IMAGE_TYPE_REGEX.test(fileType.mime)) {
@@ -109,6 +109,12 @@ export class FileService {
         await uploadPromise;
 
         return fileEntity;
+    }
+    public async uploadFile(upload: Promise<FileUpload>, bucketName = this.defaultBucket) {
+        const { createReadStream } = await upload;
+        const buffer = await readStreamToBuffer(createReadStream());
+
+        return this.uploadFileFromBuffer(buffer, bucketName);
     }
 
     public async get(fileId: File["id"]) {

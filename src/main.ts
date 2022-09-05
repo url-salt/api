@@ -9,13 +9,21 @@ import { NestFactory } from "@nestjs/core";
 
 import { AppModule } from "@root/app.module";
 
+import { MAXIMUM_IMAGE_FILE_SIZE } from "@utils/constants";
+
 config({
     path: path.join(process.cwd(), process.env.NODE_ENV === "production" ? ".env.production" : ".env.development"),
 });
 
 async function bootstrap() {
     const app = await NestFactory.create(AppModule);
-    app.use(graphqlUploadExpress({ maxFileSize: 1000000, maxFiles: 10 }));
+    app.use(
+        graphqlUploadExpress({
+            maxFileSize: MAXIMUM_IMAGE_FILE_SIZE,
+            maxFiles: 10,
+        }),
+    );
+
     app.useGlobalInterceptors(new SentryInterceptor());
 
     Sentry.init({

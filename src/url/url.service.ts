@@ -10,8 +10,11 @@ import { UrlCache } from "@url/entities/UrlCache.model";
 import { ShortenerSettings } from "@url/entities/ShortenerSettings.model";
 
 import { FileService } from "@file/file.service";
+import { File } from "@file/entities/File.model";
 
 import { generateCharacterArray } from "@utils/generateCharacterArray";
+import { parseTitleImageFromDocument } from "@utils/parseTitleImageFromDocument";
+import { MAXIMUM_EXTERNAL_IMAGE_FILE_SIZE } from "@utils/constants";
 import { sleep } from "@utils/sleep";
 import { Nullable } from "@utils/types";
 
@@ -65,7 +68,7 @@ export class UrlService {
 
     public async getUrlCache(entry: UrlEntry): Promise<UrlCache> {
         let cache: UrlCache | null;
-        if (Boolean(entry.cacheId)) {
+        if (entry.cacheId) {
             cache = await this.urlCacheRepository.findOne({
                 where: {
                     id: entry.cacheId,
@@ -79,11 +82,19 @@ export class UrlService {
 
         const { description, image, title } = await this.parseData(entry.originalUrl);
         cache = this.urlCacheRepository.create();
+
+        let file: File | null = null;
         if (entry.fileId) {
-            const file = await this.fileService.get(entry.fileId);
-            if (file) {
-                cache.image = `https://${this.fileService.defaultBucket}.s3.${this.fileService.region}.amazonaws.com/${file.name}`;
+            file = await this.fileService.get(entry.fileId);
+        } else if (image) {
+            const imageBuffer = await fetch(image).then(res => res.buffer());
+            if (imageBuffer.length <= MAXIMUM_EXTERNAL_IMAGE_FILE_SIZE) {
+                file = await this.fileService.uploadFileFromBuffer(imageBuffer);
             }
+        }
+
+        if (file) {
+            cache.image = `https://${this.fileService.defaultBucket}.s3.${this.fileService.region}.amazonaws.com/${file.name}`;
         }
 
         cache.title = entry.title || title || null;
@@ -97,7 +108,6 @@ export class UrlService {
 
         return result;
     }
-
     public async parseData(url: string) {
         const htmlCode = await fetch(url, {
             headers: {
@@ -116,10 +126,17 @@ export class UrlService {
             image: document.querySelector('meta[property="og:image"]'),
         };
 
+        let image: Nullable<string>;
+        if (opengraph.image) {
+            image = opengraph.image.getAttribute("content");
+        } else {
+            image = parseTitleImageFromDocument(document);
+        }
+
         return {
             title: opengraph.title?.getAttribute("content") || title?.textContent || null,
             description: opengraph.description?.getAttribute("content") || description?.getAttribute("content") || null,
-            image: opengraph.image?.getAttribute("content"),
+            image,
         };
     }
 }

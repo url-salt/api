@@ -33,11 +33,11 @@ export class UrlEntry {
 
     @Field(() => String)
     @Column({ type: "text", nullable: true })
-    public title!: string;
+    public title!: Nullable<string>;
 
     @Field(() => String)
     @Column({ type: "text", nullable: true })
-    public description!: string;
+    public description!: Nullable<string>;
 
     @Field(() => Date)
     @CreateDateColumn()
