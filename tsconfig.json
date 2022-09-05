@@ -18,7 +18,6 @@
         "strictBindCallApply": false,
         "forceConsistentCasingInFileNames": false,
         "noFallthroughCasesInSwitch": false,
-        "allowJs": true,
         "maxNodeModuleJsDepth": 10,
         "paths": {
             "@root/*": ["./src/*"],
