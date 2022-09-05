@@ -98,32 +98,27 @@ export class UrlService {
     }
 
     public async parseData(url: string) {
-        try {
-            const htmlCode = await fetch(url, {
-                headers: {
-                    "user-agent": "facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)",
-                },
-            }).then(res => res.text());
-            const {
-                window: { document },
-            } = new JSDOM(htmlCode);
+        const htmlCode = await fetch(url, {
+            headers: {
+                "user-agent": "facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)",
+            },
+        }).then(res => res.text());
+        const {
+            window: { document },
+        } = new JSDOM(htmlCode);
 
-            const title = document.querySelector("title");
-            const description = document.querySelector('meta[name="description"]');
-            const opengraph = {
-                title: document.querySelector('meta[property="og:title"]'),
-                description: document.querySelector('meta[property="og:description"]'),
-                image: document.querySelector('meta[property="og:image"]'),
-            };
+        const title = document.querySelector("title");
+        const description = document.querySelector('meta[name="description"]');
+        const opengraph = {
+            title: document.querySelector('meta[property="og:title"]'),
+            description: document.querySelector('meta[property="og:description"]'),
+            image: document.querySelector('meta[property="og:image"]'),
+        };
 
-            return {
-                title: opengraph.title?.getAttribute("content") || title?.textContent || null,
-                description:
-                    opengraph.description?.getAttribute("content") || description?.getAttribute("content") || null,
-                image: opengraph.image?.getAttribute("content"),
-            };
-        } catch {
-            return null;
-        }
+        return {
+            title: opengraph.title?.getAttribute("content") || title?.textContent || null,
+            description: opengraph.description?.getAttribute("content") || description?.getAttribute("content") || null,
+            image: opengraph.image?.getAttribute("content"),
+        };
     }
 }

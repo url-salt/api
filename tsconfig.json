@@ -25,7 +25,8 @@
             "@utils/*": ["./src/utils/*"],
             "@hello-world/*": ["./src/hello-world/*"],
             "@url/*": ["./src/url/*"],
-            "@file/*": ["./src/file/*"]
+            "@file/*": ["./src/file/*"],
+            "@sentry/*": ["./src/sentry/*"]
         }
     }
 }
