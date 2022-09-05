@@ -1,6 +1,6 @@
 {
     "compilerOptions": {
-        "module": "NodeNext",
+        "module": "Node16",
         "declaration": true,
         "removeComments": true,
         "emitDecoratorMetadata": true,
@@ -28,5 +28,6 @@
             "@file/*": ["./src/file/*"],
             "@sentry/*": ["./src/sentry/*"]
         }
-    }
+    },
+    "exclude": ["node_modules", "test", "dist", "**/*spec.ts", "tools"]
 }
