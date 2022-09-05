@@ -1,6 +1,8 @@
 import { JSDOM } from "jsdom";
 import { Repository } from "typeorm";
 import fetch from "node-fetch";
+import * as base62 from "base62";
+import * as _ from "lodash";
 
 import { Inject, Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
@@ -12,53 +14,90 @@ import { ShortenerSettings } from "@url/entities/ShortenerSettings.model";
 import { FileService } from "@file/file.service";
 import { File } from "@file/entities/File.model";
 
-import { generateCharacterArray } from "@utils/generateCharacterArray";
 import { parseTitleImageFromDocument } from "@utils/parseTitleImageFromDocument";
-import { MAXIMUM_EXTERNAL_IMAGE_FILE_SIZE } from "@utils/constants";
+import { MAXIMUM_EXTERNAL_IMAGE_FILE_SIZE, MINIMUM_URL_DIGITS, URL_AVAILABLE_CHARACTERS } from "@utils/constants";
 import { sleep } from "@utils/sleep";
 import { Nullable } from "@utils/types";
 
+base62.setCharacterSet(URL_AVAILABLE_CHARACTERS);
+
 @Injectable()
 export class UrlService {
-    private readonly availableCharacters: string = [
-        ...generateCharacterArray("A", "Z"), // A~Z
-        ...generateCharacterArray("a", "z"), // a~z,
-        ...generateCharacterArray("0", "9"), // 0~9
-    ].join("");
-
     public constructor(
         @InjectRepository(UrlEntry) private readonly urlEntryRepository: Repository<UrlEntry>,
         @InjectRepository(UrlCache) private readonly urlCacheRepository: Repository<UrlCache>,
         @Inject(FileService) private readonly fileService: FileService,
     ) {}
 
-    private convertToUniqueId(targetValue: number) {
-        const radix = this.availableCharacters.length;
-        const arr: string[] = [];
-        let mod: number;
+    public getIndexRange(digits: number): [number, number, number] {
+        const firstLetter = URL_AVAILABLE_CHARACTERS[0];
+        const lastLetter = URL_AVAILABLE_CHARACTERS.at(-1);
+        const startIndex = digits === 1 ? 0 : base62.decode("B".padEnd(digits - 1, firstLetter));
+        const endIndex = base62.decode("".padStart(digits, lastLetter));
 
-        do {
-            mod = targetValue % radix;
-            targetValue = (targetValue - mod) / radix;
-            arr.unshift(this.availableCharacters[mod]);
-        } while (targetValue);
+        return [startIndex, endIndex, endIndex - startIndex];
+    }
+    public async checkIfIndexNumberTaken(value: number) {
+        const data = await this.urlEntryRepository
+            .createQueryBuilder()
+            .select("COUNT(*)", "count")
+            .where("indexNo = :id", { id: value })
+            .getRawOne<{ count: string }>();
 
-        return arr.join("");
+        if (!data) {
+            throw new Error("Failed to get index number taken status.");
+        }
+
+        return parseInt(data.count, 10) > 0;
+    }
+    public async getIndexUsageCount(digits: number) {
+        const [startIndex, endIndex] = this.getIndexRange(digits);
+        const data = await this.urlEntryRepository
+            .createQueryBuilder()
+            .select("COUNT(*)", "count")
+            .where("indexNo BETWEEN :start AND :end", { start: startIndex, end: endIndex })
+            .getRawOne<{ count: string }>();
+
+        if (!data) {
+            throw new Error("Failed to get index usage count.");
+        }
+
+        return parseInt(data.count, 10);
+    }
+    public async generateNextIndexNumber() {
+        let digits = MINIMUM_URL_DIGITS;
+        while (true) {
+            const [start, end, total] = this.getIndexRange(digits);
+            const usage = await this.getIndexUsageCount(digits);
+
+            if (usage >= total) {
+                ++digits;
+                continue;
+            }
+
+            while (true) {
+                const target = _.random(start, end);
+                const taken = await this.checkIfIndexNumberTaken(target);
+                if (taken) {
+                    continue;
+                }
+
+                return target;
+            }
+        }
     }
 
     public async get(id: string) {
         return this.urlEntryRepository.createQueryBuilder("ue").where("BINARY `ue`.`uniqueId` = :id", { id }).getOne();
     }
-    public async generateNextUniqueId() {
-        const entryCount = await this.urlEntryRepository.count();
-        return this.convertToUniqueId(entryCount);
-    }
     public async shortenUrl(url: string, settings: Nullable<ShortenerSettings>) {
         await sleep(1500);
 
+        const index = await this.generateNextIndexNumber();
         const entry = this.urlEntryRepository.create();
         entry.originalUrl = url;
-        entry.uniqueId = await this.generateNextUniqueId();
+        entry.uniqueId = base62.encode(index);
+        entry.indexNo = index;
         entry.file = settings?.thumbnail ? await this.fileService.uploadFile(settings.thumbnail) : null;
         entry.title = settings?.title || null;
         entry.description = settings?.description || null;

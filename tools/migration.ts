@@ -18,6 +18,9 @@ import * as path from "path";
     const content = stdout.split("\n").slice(firstLineIndex).join("\n").trim();
     const targetDirectory = path.join(process.cwd(), "src", "migrations");
     const matches = /export class [A-Za-z]*?([0-9]*?) implements MigrationInterface/g.exec(content);
+    if (!matches) {
+        return;
+    }
 
     fs.ensureDirSync(targetDirectory);
     await fs.writeFile(path.join(targetDirectory, `${matches[1]}-${process.argv.at(-1)}.ts`), content);

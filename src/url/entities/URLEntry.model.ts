@@ -39,6 +39,9 @@ export class UrlEntry {
     @Column({ type: "text", nullable: true })
     public description!: Nullable<string>;
 
+    @Column({ type: "int", unique: true })
+    public indexNo!: number;
+
     @Field(() => Date)
     @CreateDateColumn()
     public createdAt!: Date;
