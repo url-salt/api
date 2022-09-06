@@ -4,15 +4,26 @@ import { Module } from "@nestjs/common";
 import { GraphQLModule } from "@nestjs/graphql";
 import { ApolloDriver, ApolloDriverConfig } from "@nestjs/apollo";
 import { TypeOrmModule } from "@nestjs/typeorm";
+import { BullModule } from "@nestjs/bull";
 
-import { HelloWorldModule } from "@hello-world/hello-world.module";
 import { UrlModule } from "@url/url.module";
 import { FileModule } from "@file/file.module";
+import { VisitorModule } from "@visitor/visitor.module";
 
 import { createGraphQLContext } from "@utils/createGraphQLContext";
 
 @Module({
     imports: [
+        BullModule.forRootAsync({
+            useFactory: () => {
+                return {
+                    redis: {
+                        host: process.env.REDIS_HOST || "localhost",
+                        port: process.env.REDIS_PORT ? parseInt(process.env.REDIS_PORT, 10) : undefined,
+                    },
+                };
+            },
+        }),
         TypeOrmModule.forRootAsync({
             useFactory: () => {
                 return {
@@ -52,9 +63,9 @@ import { createGraphQLContext } from "@utils/createGraphQLContext";
                 };
             },
         }),
-        HelloWorldModule,
         UrlModule,
         FileModule,
+        VisitorModule,
     ],
     controllers: [],
     providers: [],

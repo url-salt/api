@@ -3,6 +3,7 @@ import {
     CreateDateColumn,
     Entity,
     JoinColumn,
+    OneToMany,
     OneToOne,
     PrimaryGeneratedColumn,
     RelationId,
@@ -11,6 +12,7 @@ import {
 
 import { Field, ObjectType, Int } from "@nestjs/graphql";
 
+import { VisitLog } from "@visitor/entities/VisitLog.model";
 import { File } from "@file/entities/File.model";
 import { UrlCache } from "@url/entities/UrlCache.model";
 
@@ -69,4 +71,13 @@ export class UrlEntry {
 
     @RelationId((entity: UrlEntry) => entity.cache)
     public cacheId!: Nullable<UrlCache["id"]>;
+
+    //
+    // Relation (One-to-Many) - VisitLog => UrlEntry
+    //
+    @OneToMany(() => VisitLog, visitLog => visitLog.urlEntry)
+    public visitLogs!: VisitLog[];
+
+    @RelationId((entity: UrlEntry) => entity.visitLogs)
+    public visitLogIds!: VisitLog["id"][];
 }

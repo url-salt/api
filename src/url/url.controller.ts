@@ -5,6 +5,7 @@ import { Controller, Get, Inject, Param, Req, Res } from "@nestjs/common";
 
 import { UrlService } from "@url/url.service";
 import { FileService } from "@file/file.service";
+import { VisitorService } from "@visitor/visitor.service";
 
 @Controller("/")
 export class UrlController {
@@ -13,6 +14,7 @@ export class UrlController {
     public constructor(
         @Inject(UrlService) private readonly urlService: UrlService,
         @Inject(FileService) private readonly fileService: FileService,
+        @Inject(VisitorService) private readonly visitorService: VisitorService,
     ) {
         this.appUrl = `http${process.env.NODE_ENV === "production" ? "s" : ""}://${process.env.APP_URL}`;
     }
@@ -51,6 +53,7 @@ export class UrlController {
             return;
         }
 
+        await this.visitorService.registerVisitor(request, entry);
         if (isBot(request.headers["user-agent"])) {
             const { title, description, image } = await this.urlService.getUrlCache(entry);
 
@@ -68,6 +71,7 @@ export class UrlController {
     </body>
 </html>
             `);
+
             return;
         }
 

@@ -87,8 +87,19 @@ export class UrlService {
         }
     }
 
-    public async get(id: string) {
-        return this.urlEntryRepository.createQueryBuilder("ue").where("BINARY `ue`.`uniqueId` = :id", { id }).getOne();
+    public async get(id: string | number) {
+        if (typeof id === "number") {
+            return this.urlEntryRepository.findOneOrFail({
+                where: {
+                    id,
+                },
+            });
+        }
+
+        return this.urlEntryRepository
+            .createQueryBuilder("ue")
+            .where("BINARY `ue`.`uniqueId` = :id", { id })
+            .getOneOrFail();
     }
     public async shortenUrl(url: string, settings: Nullable<ShortenerSettings>) {
         await sleep(1500);

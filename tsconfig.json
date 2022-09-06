@@ -25,7 +25,8 @@
             "@hello-world/*": ["./src/hello-world/*"],
             "@url/*": ["./src/url/*"],
             "@file/*": ["./src/file/*"],
-            "@sentry/*": ["./src/sentry/*"]
+            "@sentry/*": ["./src/sentry/*"],
+            "@visitor/*": ["./src/visitor/*"]
         }
     },
     "exclude": ["node_modules", "test", "dist", "**/*spec.ts", "tools"]
