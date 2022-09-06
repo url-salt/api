@@ -45,6 +45,7 @@
         "jsdom": "^20.0.0",
         "lodash": "^4.17.21",
         "mysql2": "^2.3.3",
+        "ngrok": "^4.3.3",
         "node-fetch": "^2.6.7",
         "reflect-metadata": "^0.1.13",
         "rimraf": "^3.0.2",

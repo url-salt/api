@@ -9,6 +9,7 @@ import { BullModule } from "@nestjs/bull";
 import { UrlModule } from "@url/url.module";
 import { FileModule } from "@file/file.module";
 import { VisitorModule } from "@visitor/visitor.module";
+import { ProxyModule } from "@proxy/proxy.module";
 
 import { createGraphQLContext } from "@utils/createGraphQLContext";
 
@@ -66,6 +67,7 @@ import { createGraphQLContext } from "@utils/createGraphQLContext";
         UrlModule,
         FileModule,
         VisitorModule,
+        ProxyModule,
     ],
     controllers: [],
     providers: [],

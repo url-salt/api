@@ -26,7 +26,8 @@
             "@url/*": ["./src/url/*"],
             "@file/*": ["./src/file/*"],
             "@sentry/*": ["./src/sentry/*"],
-            "@visitor/*": ["./src/visitor/*"]
+            "@visitor/*": ["./src/visitor/*"],
+            "@proxy/*": ["./src/proxy/*"]
         }
     },
     "exclude": ["node_modules", "test", "dist", "**/*spec.ts", "tools"]

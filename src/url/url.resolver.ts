@@ -2,6 +2,7 @@ import { Inject } from "@nestjs/common";
 import { Args, Mutation, Query, ResolveField, Resolver, Root } from "@nestjs/graphql";
 
 import { UrlService } from "@url/url.service";
+import { ProxyService } from "@proxy/proxy.service";
 
 import { UrlEntry } from "@url/entities/URLEntry.model";
 import { ShortenerSettings } from "@url/entities/ShortenerSettings.model";
@@ -9,7 +10,10 @@ import { Nullable } from "@utils/types";
 
 @Resolver(() => UrlEntry)
 export class UrlResolver {
-    public constructor(@Inject(UrlService) private readonly urlService: UrlService) {}
+    public constructor(
+        @Inject(UrlService) private readonly urlService: UrlService,
+        @Inject(ProxyService) private readonly proxyService: ProxyService,
+    ) {}
 
     @Query(() => UrlEntry, { nullable: true })
     public async url(@Args("id", { type: () => String }) id: string) {
@@ -26,6 +30,6 @@ export class UrlResolver {
 
     @ResolveField(() => String, { name: "url" })
     public async urlField(@Root() root: UrlEntry) {
-        return `${process.env.SHORTENED_BASE_URL}${root.uniqueId}`;
+        return `${this.proxyService.getApiUrl()}${root.uniqueId}`;
     }
 }
