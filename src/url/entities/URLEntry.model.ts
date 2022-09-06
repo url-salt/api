@@ -31,11 +31,11 @@ export class UrlEntry {
     @Column({ type: "text" })
     public originalUrl!: string;
 
-    @Field(() => String)
+    @Field(() => String, { nullable: true })
     @Column({ type: "text", nullable: true })
     public title!: Nullable<string>;
 
-    @Field(() => String)
+    @Field(() => String, { nullable: true })
     @Column({ type: "text", nullable: true })
     public description!: Nullable<string>;
 
