@@ -77,7 +77,4 @@ export class UrlEntry {
     //
     @OneToMany(() => VisitLog, visitLog => visitLog.urlEntry)
     public visitLogs!: VisitLog[];
-
-    @RelationId((entity: UrlEntry) => entity.visitLogs)
-    public visitLogIds!: VisitLog["id"][];
 }

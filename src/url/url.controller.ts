@@ -6,6 +6,8 @@ import { Controller, Get, Inject, Param, Req, Res } from "@nestjs/common";
 import { UrlService } from "@url/url.service";
 import { FileService } from "@file/file.service";
 import { VisitorService } from "@visitor/visitor.service";
+import { UrlEntry } from "@url/entities/URLEntry.model";
+import { Nullable } from "@utils/types";
 
 @Controller("/")
 export class UrlController {
@@ -47,7 +49,14 @@ export class UrlController {
             return;
         }
 
-        const entry = await this.urlService.get(id);
+        let entry: Nullable<UrlEntry> = null;
+        try {
+            entry = await this.urlService.get(id);
+        } catch {
+            response.redirect(302, this.appUrl);
+            return;
+        }
+
         if (!entry) {
             response.redirect(302, this.appUrl);
             return;

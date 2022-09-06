@@ -51,6 +51,9 @@ import { createGraphQLContext } from "@utils/createGraphQLContext";
             inject: [],
             useFactory: () => {
                 return {
+                    buildSchemaOptions: {
+                        dateScalarMode: "timestamp",
+                    },
                     cors: {
                         origin: "http://localhost:30000",
                         credentials: true,
