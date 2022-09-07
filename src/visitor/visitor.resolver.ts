@@ -1,4 +1,10 @@
-import { Resolver } from "@nestjs/graphql";
+import { ResolveField, Resolver, Root } from "@nestjs/graphql";
+import { VisitLog } from "@visitor/entities/VisitLog.model";
 
-@Resolver()
-export class VisitorResolver {}
+@Resolver(() => VisitLog)
+export class VisitorResolver {
+    @ResolveField(() => String)
+    public async ip(@Root() root: VisitLog) {
+        return [...root.ip.split(".").slice(0, 2), "*", "*"].join(".");
+    }
+}
