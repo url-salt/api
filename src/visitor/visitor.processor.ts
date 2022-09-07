@@ -14,6 +14,8 @@ import { UrlService } from "@url/url.service";
 import { UrlEntry } from "@url/entities/URLEntry.model";
 
 import { IPAPIResult } from "@utils/types";
+import { pubSub } from "@utils/pubSub";
+import { VISIT_LOG_ADDED_SUBSCRIPTION } from "@visitor/visitor.resolver";
 
 export interface VisitorRegisterData {
     ip?: string;
@@ -77,7 +79,8 @@ export class VisitorProcessor {
         log.isBot = isBot(data.userAgent);
         log.urlEntry = await this.urlService.get(data.urlEntryId);
 
-        await this.visitLogRepository.save(log);
+        const visitLog = await this.visitLogRepository.save(log);
+        await pubSub.publish(VISIT_LOG_ADDED_SUBSCRIPTION, { [VISIT_LOG_ADDED_SUBSCRIPTION]: visitLog });
 
         this.logger.log(`Successfully registered visitor information: [${data.ip}, ${data.userAgent}]`);
     }

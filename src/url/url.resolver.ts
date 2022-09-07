@@ -45,4 +45,9 @@ export class UrlResolver {
     ) {
         return this.visitorService.getVisitLogsFromUrlEntity(root, take, before);
     }
+
+    @ResolveField(() => Int)
+    public async hits(@Root() root: UrlEntry) {
+        return this.visitorService.getVisitLogCountFromUrlEntity(root);
+    }
 }

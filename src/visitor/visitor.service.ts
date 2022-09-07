@@ -22,6 +22,20 @@ export class VisitorService {
         @InjectRepository(VisitLog) private readonly visitLogRepository: Repository<VisitLog>,
     ) {}
 
+    public async getVisitLogCountFromUrlEntity(entity: UrlEntry) {
+        const data = await this.visitLogRepository
+            .createQueryBuilder("s")
+            .select("COUNT(`s`.`id`)", "count")
+            .where("`s`.`urlEntryId` = :entityId", { entityId: entity.id })
+            .orderBy("`s`.`id`", "DESC")
+            .getRawOne<{ count: string }>();
+
+        if (!data) {
+            throw new Error("방문 기록 데이터 수를 불러오는데 문제가 발생 하였습니다.");
+        }
+
+        return data.count;
+    }
     public async getVisitLogsFromUrlEntity(entity: UrlEntry, take: number, before: Nullable<VisitLog["id"]>) {
         let builder = this.visitLogRepository
             .createQueryBuilder("s")
