@@ -79,7 +79,7 @@ jobs:
             - name: Publish using Docker Swarm
               uses: appleboy/ssh-action@master
               with:
-                  host: sophia-dev.io
+                  host: sophia-web.dev
                   username: root
                   password: ${{ secrets.SSH_PASSWORD }}
                   script: |
