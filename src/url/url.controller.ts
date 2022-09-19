@@ -1,12 +1,15 @@
-import type { Response, Request } from "express";
+import type { Request, Response } from "express";
 import isBot from "isbot";
 
 import { Controller, Get, Inject, Param, Req, Res } from "@nestjs/common";
 
 import { UrlService } from "@url/url.service";
+import { UrlEntry } from "@url/entities/URLEntry.model";
+
 import { FileService } from "@file/file.service";
 import { VisitorService } from "@visitor/visitor.service";
-import { UrlEntry } from "@url/entities/URLEntry.model";
+
+import { generateBotCode } from "@utils/generateBotCode";
 import { Nullable } from "@utils/types";
 
 @Controller("/")
@@ -65,22 +68,14 @@ export class UrlController {
         await this.visitorService.registerVisitor(request, entry);
         if (isBot(request.headers["user-agent"])) {
             const { title, description, image } = await this.urlService.getUrlCache(entry);
-
-            response.send(`
-<!DOCTYPE HTML>
-<html lang="ko">
-    <head>
-        <title>${title || ""}</title>
-        <meta name="description" content="${description || ""}" />
-        <meta property="og:title" content="${title || ""}" />
-        <meta property="og:description" content="${description || ""}" />
-        ${image ? `<meta property="og:image" content="${image || ""}" />` : ""}
-    </head>
-    <body>
-    </body>
-</html>
-            `);
-
+            response.send(
+                generateBotCode({
+                    title,
+                    description,
+                    image,
+                    url: entry.originalUrl,
+                }),
+            );
             return;
         }
 
