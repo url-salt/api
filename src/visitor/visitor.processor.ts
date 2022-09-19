@@ -4,7 +4,7 @@ import parseUserAgent from "ua-parser-js";
 import { Repository } from "typeorm";
 import isBot from "isbot";
 
-import { Inject, Injectable, Logger } from "@nestjs/common";
+import { forwardRef, Inject, Injectable, Logger } from "@nestjs/common";
 import { OnQueueFailed, Process, Processor } from "@nestjs/bull";
 import { InjectRepository } from "@nestjs/typeorm";
 
@@ -15,7 +15,8 @@ import { UrlEntry } from "@url/entities/URLEntry.model";
 
 import { IPAPIResult } from "@utils/types";
 import { pubSub } from "@utils/pubSub";
-import { VISIT_LOG_ADDED_SUBSCRIPTION } from "@visitor/visitor.resolver";
+import { HIT_COUNT_CHANGED_SUBSCRIPTION, VISIT_LOG_ADDED_SUBSCRIPTION } from "@visitor/visitor.resolver";
+import { VisitorService } from "@visitor/visitor.service";
 
 export interface VisitorRegisterData {
     ip?: string;
@@ -33,6 +34,7 @@ export class VisitorProcessor {
     public constructor(
         @InjectRepository(VisitLog) private readonly visitLogRepository: Repository<VisitLog>,
         @Inject(UrlService) private readonly urlService: UrlService,
+        @Inject(forwardRef(() => VisitorService)) private readonly visitorService: VisitorService,
     ) {}
 
     public async getCountryFromIP(ip: string) {
@@ -81,6 +83,14 @@ export class VisitorProcessor {
 
         const visitLog = await this.visitLogRepository.save(log);
         await pubSub.publish(VISIT_LOG_ADDED_SUBSCRIPTION, { [VISIT_LOG_ADDED_SUBSCRIPTION]: visitLog });
+
+        const newHitCount = await this.visitorService.getVisitLogCountFromUrlEntity(log.urlEntry);
+        await pubSub.publish(HIT_COUNT_CHANGED_SUBSCRIPTION, {
+            [HIT_COUNT_CHANGED_SUBSCRIPTION]: {
+                uniqueId: log.urlEntry.uniqueId,
+                count: newHitCount,
+            },
+        });
 
         this.logger.log(`Successfully registered visitor information: [${data.ip}, ${data.userAgent}]`);
     }
